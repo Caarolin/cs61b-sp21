@@ -1,6 +1,8 @@
 package deque;
 
-public class ArrayDeque<T> {
+import java.util.Iterator;
+
+public class ArrayDeque<T> implements Deque<T>, Iterable<T>{
     private int size;
     private int nextFirst;
     private int nextLast;
@@ -28,6 +30,7 @@ public class ArrayDeque<T> {
         nextFirst = capacity - 1;
         nextLast = size;
     }
+    @Override
     public void addFirst(T item) {
         if (size == items.length) {
             resize(size * 2);
@@ -36,6 +39,7 @@ public class ArrayDeque<T> {
         nextFirst = (nextFirst - 1 + items.length) % items.length;
         size += 1;
     }
+    @Override
     public void addLast(T item) {
         if (size == items.length) {
             resize(size * 2);
@@ -44,17 +48,13 @@ public class ArrayDeque<T> {
         nextLast = (nextLast + 1) % items.length;
         size += 1;
     }
-    public boolean isEmpty() {
-        if (size == 0) {
-            return true;
-        }
-        return false;
-    }
+    @Override
     public int size() {
         return size;
     }
+    @Override
     public void printDeque() {
-        if (!this.isEmpty()) {
+        if (size != 0) {
             int first = (nextFirst + 1) % items.length;
             int last = (nextLast - 1 + items.length) % items.length;
             while (first != last) {
@@ -64,11 +64,12 @@ public class ArrayDeque<T> {
             System.out.print(items[last] + "\n");
         }
     }
+    @Override
     public T removeFirst() {
         if ((size < items.length / 4) && (size > 4)) {
             resize(items.length / 4);
         }
-        if (!this.isEmpty()) {
+        if (size != 0) {
             nextFirst = (nextFirst + 1) % items.length;
             T first = items[nextFirst];
             items[nextFirst] = null;
@@ -77,11 +78,12 @@ public class ArrayDeque<T> {
         }
         return null;
     }
+    @Override
     public T removeLast() {
         if ((size < items.length / 4) && (size > 4)) {
             resize(items.length / 4);
         }
-        if (!this.isEmpty()) {
+        if (size != 0) {
             nextLast = (nextLast - 1 + items.length) % items.length;
             T last = items[nextLast];
             items[nextLast] = null;
@@ -90,11 +92,47 @@ public class ArrayDeque<T> {
         }
         return null;
     }
+    @Override
     public T get(int index) {
         if (index >= size) {
             return null;
         }
         int first = (nextFirst + 1) % items.length;
         return items[(index + first) % items.length];
+    }
+    public Iterator<T> iterator() {
+        return new ALDequeIterator();
+    }
+    /* Constructs an iterator for the Deque that has two methods:
+     *  a). hasNext: checks if the Deque has another element to iterate;
+     *  b). next: returns the current element of the Deque and moves the pointer to the next element. */
+    private class ALDequeIterator implements Iterator<T> {
+        private int position;
+        public ALDequeIterator() {
+            position = 0;
+        }
+        public boolean hasNext() {
+            return position < size;
+        }
+        public T next() {
+            T returnItem = get(position);
+            position += 1;
+            return returnItem;
+        }
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof ArrayDeque a2) {
+            if (this.size != a2.size()) {
+                return false;
+            }
+            for (int i = 0; i < size; i++) {
+                if (!this.get(i).equals(a2.get(i))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
     }
 }
