@@ -6,10 +6,10 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     /* private class of the naked node structure*/
     /* define Node which is element of the Deque */
     private class Node {
-        public Node prev;
-        public T item;
-        public Node next;
-        public Node(Node p, T i, Node n) {
+        Node prev;
+        T item;
+        Node next;
+        Node(Node p, T i, Node n) {
             this.prev = p;
             this.item = i;
             this.next = n;
@@ -22,12 +22,6 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         sentinel.prev = sentinel;
         sentinel.next = sentinel;
         size = 0;
-    }
-    public LinkedListDeque(T item) {
-        sentinel = new Node(null, null, null);
-        sentinel.next = new Node(sentinel, item, sentinel);
-        sentinel.prev = sentinel.next;
-        size = 1;
     }
     @Override
     public void addFirst(T item) {
@@ -107,10 +101,10 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     }
     /* Constructs an iterator for the Deque that has two methods:
     *  a). hasNext: checks if the Deque has another element to iterate;
-    *  b). next: returns the current element of the Deque and moves the pointer to the next element. */
+    *  b). next: return current element of the Deque, move the pointer to the next element */
     private class LLDequeIterator implements Iterator<T> {
         private int position;
-        public LLDequeIterator() {
+        LLDequeIterator() {
             position = 0;
         }
         public boolean hasNext() {
@@ -124,11 +118,19 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     }
     @Override
     public boolean equals(Object o) {
-        if (o == null) { return false; }
-        if (o == this) { return true; }
-        if (o.getClass() != this.getClass()) { return false; }
-        LinkedListDeque<T> d2 = (LinkedListDeque<T>) o;
-        if (this.size() != d2.size()) { return false; }
+        if (o == null) {
+            return false;
+        }
+        if (o == this) {
+            return true;
+        }
+        if (o.getClass().getSuperclass() != this.getClass().getSuperclass()) {
+            return false;
+        }
+        Deque<T> d2 = (Deque<T>) o;
+        if (this.size() != d2.size()) {
+            return false;
+        }
         for (int i = 0; i < size; i++) {
             if (!this.get(i).equals(d2.get(i))) {
                 return false;
@@ -137,7 +139,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         return true;
         /*
         if (o == this) { return true; }
-        if (o instanceof LinkedListDeque d2) {
+        if (o instanceof Deque d2) {
             if (this.size != d2.size()) {
                 return false;
             }
@@ -149,6 +151,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
             return true;
         }
         return false;
+
          */
     }
 }

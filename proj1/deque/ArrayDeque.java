@@ -2,7 +2,7 @@ package deque;
 
 import java.util.Iterator;
 
-public class ArrayDeque<T> implements Deque<T>, Iterable<T>{
+public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     private int size;
     private int nextFirst;
     private int nextLast;
@@ -105,10 +105,10 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T>{
     }
     /* Constructs an iterator for the Deque that has two methods:
      *  a). hasNext: checks if the Deque has another element to iterate;
-     *  b). next: returns the current element of the Deque and moves the pointer to the next element. */
+     *  b). next: return current element of the Deque, move the pointer to the next element */
     private class ALDequeIterator implements Iterator<T> {
         private int position;
-        public ALDequeIterator() {
+        ALDequeIterator() {
             position = 0;
         }
         public boolean hasNext() {
@@ -122,11 +122,19 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T>{
     }
     @Override
     public boolean equals(Object o) {
-        if (o == null) { return false; }
-        if (o == this) { return true; }
-        if (o.getClass() != this.getClass()) { return false; }
-        ArrayDeque<T> a2 = (ArrayDeque<T>) o;
-        if (this.size() != a2.size()) { return false; }
+        if (o == null) {
+            return false;
+        }
+        if (o == this) {
+            return true;
+        }
+        if (o.getClass().getSuperclass() != this.getClass().getSuperclass()) {
+            return false;
+        }
+        Deque<T> a2 = (Deque<T>) o;
+        if (this.size() != a2.size()) {
+            return false;
+        }
         for (int i = 0; i < size; i++) {
             if (!this.get(i).equals(a2.get(i))) {
                 return false;
@@ -135,7 +143,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T>{
         return true;
         /*
         if (o == this) { return true; }
-        if (o instanceof ArrayDeque a2) {
+        if (o instanceof Deque a2) {
             if (this.size != a2.size()) {
                 return false;
             }
