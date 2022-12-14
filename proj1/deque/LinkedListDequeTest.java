@@ -136,9 +136,11 @@ public class LinkedListDequeTest {
         lld5.addFirst(2);
         ad1.addFirst(3);
         ad1.addFirst(2);
+        String s1 = "this is a string";
         assertFalse("Should not be equal", lld1.equals(lld5));
         assertFalse("Should not be equal", lld1.equals(lld3));
         assertTrue("Should be equal", lld2.equals(lld4));
         assertTrue("Should be equal", lld5.equals(ad1));
+        assertFalse("Should not be equal", lld1.equals(s1));
     }
 }
