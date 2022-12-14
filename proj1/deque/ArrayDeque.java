@@ -122,6 +122,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     }
     @Override
     public boolean equals(Object o) {
+        /* a dumb version to pass autograder
         if (o == null) {
             return false;
         }
@@ -142,7 +143,9 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             }
         }
         return true;
-        /*
+
+         */
+
         if (o == this) { return true; }
         if (o instanceof Deque a2) {
             if (this.size != a2.size()) {
@@ -156,7 +159,5 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             return true;
         }
         return false;
-
-         */
     }
 }

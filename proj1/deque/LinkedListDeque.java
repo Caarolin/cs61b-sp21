@@ -118,6 +118,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     }
     @Override
     public boolean equals(Object o) {
+        /* a dumb version to pass autograder
         if (o == null) {
             return false;
         }
@@ -138,7 +139,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
             }
         }
         return true;
-        /*
+         */
         if (o == this) { return true; }
         if (o instanceof Deque d2) {
             if (this.size != d2.size()) {
@@ -152,7 +153,5 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
             return true;
         }
         return false;
-
-         */
     }
 }
