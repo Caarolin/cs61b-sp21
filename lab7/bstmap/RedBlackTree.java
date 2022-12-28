@@ -1,40 +1,35 @@
 package bstmap;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
-public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
+public class RedBlackTree<K extends Comparable<K>, V> implements Map61B<K, V> {
     protected class TreeNode {
         K key;
         V value;
         int size;
+        boolean color; // true is red, false is black
         TreeNode leftChild;
         TreeNode rightChild;
-        TreeNode(K k, V v, int s) {
+        TreeNode(K k, V v, int s, boolean c) {
             this.key = k;
             this.value = v;
             this.size = s;
+            this.color = c;
         }
     }
+    private static final boolean RED = true;
+    private static final boolean BLACK  = false;
     protected TreeNode root;
-
-    public BSTMap() {}
-
-    /** Removes all of the mappings from this map. */
     @Override
     public void clear() {
         root = null;
     }
 
-    /** Returns true if this map contains a mapping for the specified key. */
     @Override
     public boolean containsKey(K key) {
-        if (key == null) {
-            throw new IllegalArgumentException("cannot find null");
-        }
-        if (find(root, key) == null) {
-            return false;
-        }
-        return true;
+        return get(key) != null;
     }
 
     @Override
@@ -43,20 +38,14 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
             throw new IllegalArgumentException("cannot get null");
         }
         TreeNode p = find(root, key);
-        if (p == null) {
-            return null;
-        }
+        if (p == null) { return null; }
         return p.value;
     }
-    /** A helper function to find the node with the matching key */
+
     private TreeNode find(TreeNode n, K key) {
-        if (n == null) {
-            return null;
-        }
+        if (n == null) { return null; }
         int compare = key.compareTo(n.key);
-        if (compare == 0) {
-            return n;
-        }
+        if (compare == 0) { return n; }
         if (compare > 0) {
             return find(n.rightChild, key);
         }
@@ -67,45 +56,42 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
     public int size() {
         return size(root);
     }
-
     protected int size(TreeNode n) {
         if (n == null) { return 0; }
         return n.size;
     }
 
-    /** Add key, value pair to the map. Recursion version. */
     @Override
     public void put(K key, V value) {
         if (key == null) {
             throw new IllegalArgumentException("cannot insert null");
         }
         root = put(root, key, value);
+        root.color = BLACK;
     }
-    /** A helper function to insert new node recursively */
+
     private TreeNode put(TreeNode n, K key, V value) {
         if (n == null) {
-            return new TreeNode(key, value, 1);
+            return new TreeNode(key, value, 1, RED);
         }
         int compare = key.compareTo(n.key);
-        // Recursively updates nodes along the search path
         if (compare > 0) {
             n.rightChild = put(n.rightChild, key, value);
-        } else if (compare < 0) {
+        }
+        else if (compare < 0) {
             n.leftChild = put(n.leftChild, key, value);
         } else {
             n.value = value;
         }
-        // Update size recursively
+        n = balance(n);
         n.size = size(n.leftChild) + size(n.rightChild) + 1;
         return n;
     }
 
-    /** Returns a Set view of the keys contained in this map. */
     @Override
     public Set<K> keySet() {
         return traverseInorder(root, new LinkedHashSet<>());
     }
-    /** A helper function to traverse the BSTMap and add keys to set in order */
     private Set<K> traverseInorder(TreeNode n, Set<K> s) {
         if (n == null) {
             return s;
@@ -123,8 +109,17 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
     @Override
     public V remove(K key) {
         V val = get(key);
+        if (val == null) { return null; }
         root = remove(root, key);
+        if (root != null) {
+            root.color = BLACK;
+        }
         return val;
+    }
+
+    @Override
+    public V remove(K key, V value) {
+        return remove(key);
     }
 
     private TreeNode remove(TreeNode n, K key) {
@@ -151,12 +146,12 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
             successor.size = n.size - 1;
             return successor;
         }
+        n = balance(n);
         n.size = size(n.leftChild) + size(n.rightChild) + 1;
         return n;
     }
 
-    /** A helper function to find the min of the tree. */
-    protected TreeNode findMin(TreeNode n) {
+    private TreeNode findMin(TreeNode n) {
         if (n == null) {
             return null;
         }
@@ -166,9 +161,31 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         return findMin(n.leftChild);
     }
 
-    @Override
-    public V remove(K key, V value) {
-        return remove(key);
+    private TreeNode balance(TreeNode n) {
+        if (n == null) { return null; }
+        // If n has right link, rotate left
+        if (isRed(n.rightChild) && !isRed(n.leftChild)) {
+            n = rotateLeft(n);
+        }
+        // If n has two left links, rotate right
+        if (isRed(n.leftChild) && isRed(n.leftChild.leftChild)) {
+            n = rotateRight(n);
+        }
+        // If n's right and left link are both red, flip the color
+        if (isRed(n.leftChild) && isRed(n.rightChild)) {
+            colorFlip(n);
+        }
+        return n;
+    }
+    private boolean isRed(TreeNode n) {
+        if (n == null) { return false; }
+        return n.color == RED;
+    }
+    // Flip the color of the children to be black, and self to be red
+    private void colorFlip(TreeNode n) {
+        n.color = !n.color;
+        n.leftChild.color = !n.leftChild.color;
+        n.rightChild.color = !n.rightChild.color;
     }
 
     @Override
@@ -176,40 +193,48 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         return keySet().iterator();
     }
 
-    public void printInOrder() {
-        for (K key : keySet()) {
-            System.out.print(key + " ");
-        }
-        System.out.println();
+    protected TreeNode rotateLeft(TreeNode n) {
+        if (n.rightChild == null) { return n; }
+        TreeNode right = n.rightChild;
+        // n's right points to rightChild's original left child
+        n.rightChild = right.leftChild;
+        // rightChild's left points to n
+        right.leftChild = n;
+        // Update size
+        right.size = n.size;
+        n.size = size(n.leftChild) + size(n.rightChild) + 1;
+        //Update color. When rotating left, right child is red
+        right.color = n.color;
+        n.color = RED;
+        // n's parent points to rightChild
+        return right;
     }
 
+    protected TreeNode rotateRight(TreeNode n) {
+        if (n.leftChild == null) { return n; }
+        TreeNode left = n.leftChild;
+        // n's left points to leftChild's original right child
+        n.leftChild = left.rightChild;
+        // leftChild's right child points to n
+        left.rightChild = n;
+        // Update size
+        left.size = n.size;
+        n.size = size(n.leftChild) + size(n.rightChild) + 1;
+        //Update color. When rotating right, left child is red
+        left.color = n.color;
+        n.color = RED;
+        // n's parent points to n's left child
+        return left;
+    }
 
-    /** Add key, value pair to the map. Iteration version, quite ugly. DON'T USE. */
-    private void putIterative(K key, V value) {
-        if (key == null) {
-            throw new IllegalArgumentException("cannot insert null");
-        }
-        if (size(root) == 0) {
-            root = new TreeNode(key, value, 1);
-        } else {
-            TreeNode p = root;
-            while (p != null) {
-                if (key.compareTo(p.key) > 0) {
-                    if (p.rightChild == null) {
-                        p.rightChild = new TreeNode(key, value, 1);
-                        break;
-                    }
-                    p.size += 1;
-                    p = p.rightChild;
-                } else {
-                    if (p.leftChild == null) {
-                        p.leftChild = new TreeNode(key, value, 1);
-                        break;
-                    }
-                    p.size += 1;
-                    p = p.leftChild;
-                }
-            }
-        }
+    public static void main(String[] args) {
+        RedBlackTree<Integer, Integer> test = new RedBlackTree<>();
+        test.put(0, 1);
+        test.put(1, 1);
+        System.out.println("root is " + test.root.key);
+        test.put(2, 1);
+        System.out.println("root is " + test.root.key);
+        test.put(3, 1);
+        test.remove(1);
     }
 }
